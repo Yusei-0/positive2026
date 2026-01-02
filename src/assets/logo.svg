@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="sunrise" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#f6d365;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#fda085;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- Main Sun/Spark Shape -->
+  <path d="M256 64C267.3 64 276.9 73.1 278.4 84.4L285.8 141.2C289.4 168.6 311.4 190.6 338.8 194.2L395.6 201.6C406.9 203.1 416 212.7 416 224C416 235.3 406.9 244.9 395.6 246.4L338.8 253.8C311.4 257.4 289.4 279.4 285.8 306.8L278.4 363.6C276.9 374.9 267.3 384 256 384C244.7 384 235.1 374.9 233.6 363.6L226.2 306.8C222.6 279.4 200.6 257.4 173.2 253.8L116.4 246.4C105.1 244.9 96 235.3 96 224C96 212.7 105.1 203.1 116.4 201.6L173.2 194.2C200.6 190.6 222.6 168.6 226.2 141.2L233.6 84.4C235.1 73.1 244.7 64 256 64Z" 
+  fill="url(#sunrise)" stroke="none"/>
+  
+  <!-- Subtle Circle for balance -->
+  <circle cx="256" cy="224" r="30" fill="#ffffff" opacity="0.8"/>
+  
+  <!-- Rays/Burst (Optional simpler branding) -->
+  <circle cx="256" cy="224" r="180" fill="none" stroke="url(#sunrise)" stroke-width="12" stroke-opacity="0.3" stroke-dasharray="20 40"/>
+</svg>

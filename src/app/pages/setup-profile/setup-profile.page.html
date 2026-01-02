@@ -1,0 +1,32 @@
+<ion-content [fullscreen]="true">
+    <div class="setup-container">
+        <div class="background-blobs">
+            <div class="blob blob-3"></div>
+            <div class="blur-overlay"></div>
+        </div>
+
+        <div class="card-setup animate-pop-in">
+            <div class="icon-header">
+                <ion-icon name="person-outline"></ion-icon>
+            </div>
+
+            <h1 class="title">Crea tu Identidad</h1>
+            <p class="subtitle">¿Cómo quieres que te conozca la comunidad?</p>
+
+            <div class="form-group">
+                <ion-item class="custom-item" lines="none">
+                    <ion-label position="stacked" color="medium">Nombre de Usuario</ion-label>
+                    <ion-input type="text" [(ngModel)]="username" placeholder="@usuario_creativo"
+                        class="custom-input"></ion-input>
+                </ion-item>
+
+                <p class="error-text" *ngIf="errorMsg">{{ errorMsg }}</p>
+
+                <ion-button expand="block" class="main-btn" (click)="saveUsername()" [disabled]="loading">
+                    <span *ngIf="!loading">Continuar</span>
+                    <ion-spinner *ngIf="loading" name="crescent"></ion-spinner>
+                </ion-button>
+            </div>
+        </div>
+    </div>
+</ion-content>

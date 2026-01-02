@@ -1,0 +1,52 @@
+<ion-content [fullscreen]="true">
+    <div class="login-container">
+        <!-- Background Elements similar to Home -->
+        <div class="background-blobs">
+            <div class="blob blob-1"></div>
+            <div class="blob blob-2"></div>
+        </div>
+
+        <div class="card-login animate-pop-in">
+            <!-- Logo -->
+            <div style="margin-bottom: 2rem; display: flex; justify-content: center;">
+                <app-logo size="100px"></app-logo>
+            </div>
+
+            <h1 class="title">Positive 2026 ✨</h1>
+            <p class="subtitle">Inicia sesión para inspirarte</p>
+
+            <!-- Step 1: Email -->
+            <div *ngIf="step === 1" class="form-step animate-slide-up">
+                <ion-item class="custom-item" lines="none">
+                    <ion-icon name="mail-outline" slot="start" style="margin-right: 10px; color: #636e72;"></ion-icon>
+                    <ion-input type="email" placeholder="tu@email.com" [(ngModel)]="email"
+                        class="custom-input"></ion-input>
+                </ion-item>
+                <ion-button expand="block" class="main-btn" (click)="sendCode()" [disabled]="loading">
+                    <span *ngIf="!loading">Enviar Código</span>
+                    <ion-spinner *ngIf="loading" name="crescent"></ion-spinner>
+                </ion-button>
+            </div>
+
+            <!-- Step 2: OTP -->
+            <div *ngIf="step === 2" class="form-step animate-slide-up">
+                <p class="instruction">Enviamos un código a <strong>{{ email }}</strong></p>
+                <ion-item class="custom-item" lines="none">
+                    <ion-icon name="key-outline" slot="start" style="margin-right: 10px; color: #636e72;"></ion-icon>
+                    <ion-input type="text" placeholder="123456" [(ngModel)]="otp" maxlength="8"
+                        class="custom-input"></ion-input>
+                </ion-item>
+                <ion-button expand="block" class="main-btn" (click)="verifyCode()" [disabled]="loading">
+                    <span *ngIf="!loading">Verificar</span>
+                    <ion-spinner *ngIf="loading" name="crescent"></ion-spinner>
+                </ion-button>
+                <p class="back-link" (click)="step = 1">Cambiar email</p>
+            </div>
+
+
+        </div>
+    </div>
+
+    <ion-toast [isOpen]="isToastOpen" [message]="toastMessage" [duration]="2000" (didDismiss)="isToastOpen = false"
+        color="dark"></ion-toast>
+</ion-content>

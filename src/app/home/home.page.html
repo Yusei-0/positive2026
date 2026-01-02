@@ -1,25 +1,41 @@
 <ion-content [fullscreen]="true" class="ion-no-border">
-  <div id="capture-container" class="content-wrapper">
-    <!-- Background is part of capture -->
+  <div class="content-wrapper">
+    <!-- Background -->
     <div class="background-container">
       <div class="blob blob-1"></div>
       <div class="blob blob-2"></div>
-      <div class="blob blob-3"></div>
+      <div class="blb blob-3"></div>
       <div class="blur-overlay"></div>
     </div>
 
     <div class="main-container">
-      <div class="header-section">
-        <h3>Positive 2026</h3>
-        <p>Tu dosis diaria de inspiración</p>
+      <div class="brand-header">
+        <div class="brand-left">
+          <div class="logo-wrapper">
+            <img src="assets/logo.svg" alt="Positive 2026 Logo" class="header-logo">
+          </div>
+          <span class="brand-name">Positive 2026</span>
+        </div>
+
+        <div class="brand-right" *ngIf="userProfile">
+          <div class="user-chip" (click)="goToProfile()">
+            <span class="user-name">{{ userProfile.username }}</span>
+            <div class="user-avatar">
+              {{ userProfile.username.charAt(0).toUpperCase() }}
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div class="quote-section">
+      <!-- Hero Quote Section -->
+      <div id="main-quote-card" class="quote-section">
         <ng-container *ngIf="!loading; else loaderTemplate">
           <div class="quote-card animate-pop-in">
-            <div class="quote-icon">
-              <ion-icon name="heart-outline"></ion-icon>
-            </div>
+            <div class="quote-badge">Frase del Día</div>
+
+            <!-- Spacer since icon is removed -->
+            <div style="height: 20px;"></div>
+
             <h1 class="quote-text">
               {{ quote }}
             </h1>
@@ -27,12 +43,15 @@
 
             <div class="divider"></div>
 
-            <!-- Buttons -->
             <div class="actions exclude-from-capture">
-              <ion-button fill="clear" color="dark" (click)="shareImage()" class="action-btn">
+              <!-- <ion-button fill="clear" color="dark" (click)="toggleMainLike()" [color]="mainLiked ? 'danger' : 'dark'">
+                <ion-icon [name]="mainLiked ? 'heart' : 'heart-outline'"></ion-icon>
+                <span style="font-size: 0.9rem; margin-left: 5px;" *ngIf="mainLikes > 0">{{ mainLikes }}</span>
+              </ion-button> -->
+              <ion-button fill="clear" color="dark" (click)="shareImage('main-quote-card')" class="action-btn">
                 <ion-icon slot="icon-only" name="share-social-outline"></ion-icon>
               </ion-button>
-              <ion-button fill="clear" color="dark" (click)="copyImage()" class="action-btn">
+              <ion-button fill="clear" color="dark" (click)="copyImage('main-quote-card')" class="action-btn">
                 <ion-icon slot="icon-only" name="copy-outline"></ion-icon>
               </ion-button>
             </div>
@@ -40,14 +59,101 @@
         </ng-container>
 
         <ng-template #loaderTemplate>
-          <div class="loader-wrapper">
-            <ion-spinner name="bubbles" color="dark"></ion-spinner>
-            <p>Buscando inspiración...</p>
+          <div class="quote-card skeleton-card">
+            <div style="width: 100%; display:flex; flex-direction:column; align-items:center;">
+              <ion-skeleton-text animated
+                style="width: 40%; height: 20px; border-radius: 10px; margin-bottom: 2rem;"></ion-skeleton-text>
+              <ion-skeleton-text animated
+                style="width: 90%; height: 30px; border-radius: 5px; margin-bottom: 10px;"></ion-skeleton-text>
+              <ion-skeleton-text animated
+                style="width: 70%; height: 30px; border-radius: 5px; margin-bottom: 2rem;"></ion-skeleton-text>
+              <ion-skeleton-text animated style="width: 30%; height: 20px; border-radius: 5px;"></ion-skeleton-text>
+            </div>
           </div>
         </ng-template>
       </div>
+
+      <!-- Community Section -->
+      <div class="community-section">
+        <div class="section-title">Comunidad</div>
+
+        <!-- Loading State -->
+        <ng-container *ngIf="communityLoading">
+          <div class="community-list">
+            <div *ngFor="let i of [1,2,3]" class="community-card skeleton-card">
+              <div class="card-content">
+                <ion-skeleton-text animated
+                  style="width: 90%; height: 20px; border-radius: 5px; margin-bottom: 10px;"></ion-skeleton-text>
+                <ion-skeleton-text animated
+                  style="width: 70%; height: 20px; border-radius: 5px; margin-bottom: 10px;"></ion-skeleton-text>
+                <ion-skeleton-text animated style="width: 40%; height: 15px; border-radius: 5px;"></ion-skeleton-text>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+        <!-- Error State -->
+        <ng-container *ngIf="!communityLoading && communityError">
+          <div class="error-state">
+            <p>No se pudieron cargar las frases de la comunidad</p>
+            <ion-button fill="clear" (click)="loadCommunityFeed()">Reintentar</ion-button>
+          </div>
+        </ng-container>
+
+        <!-- Loaded State -->
+        <ng-container *ngIf="!communityLoading && !communityError">
+          <div class="community-list" *ngIf="communityQuotes.length > 0">
+            <div *ngFor="let comQuote of communityQuotes" [id]="comQuote.id" class="community-card animate-slide-up">
+              <div class="card-content">
+                <p class="com-text">"{{ comQuote.content }}"</p>
+                <div class="card-meta">
+                  <span class="com-author">— {{ comQuote.author }}</span>
+                  <span class="com-date">{{ comQuote.createdAt }}</span>
+                </div>
+              </div>
+              <div class="card-actions exclude-from-capture">
+                <div class="left-actions">
+                  <ion-button fill="clear" size="small" (click)="toggleLike(comQuote)"
+                    [color]="comQuote.liked ? 'danger' : 'medium'">
+                    <ion-icon [name]="comQuote.liked ? 'heart' : 'heart-outline'"></ion-icon>
+                    <span class="like-count">{{ comQuote.likes }}</span>
+                  </ion-button>
+                </div>
+                <div class="right-actions">
+                  <ion-button fill="clear" size="small" color="medium" (click)="copyImage(comQuote.id)">
+                    <ion-icon slot="icon-only" name="copy-outline"></ion-icon>
+                  </ion-button>
+                  <ion-button fill="clear" size="small" color="medium" (click)="shareImage(comQuote.id)">
+                    <ion-icon slot="icon-only" name="share-social-outline"></ion-icon>
+                  </ion-button>
+                  <!-- <ion-button fill="clear" size="small" color="medium" (click)="reportQuote(comQuote)">
+                    <ion-icon slot="icon-only" name="flag-outline"></ion-icon>
+                  </ion-button> -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="empty-state" *ngIf="communityQuotes.length === 0">
+            <p>Sé el primero en compartir una frase inspiradora ✨</p>
+          </div>
+
+          <!-- Infinite Scroll -->
+          <ion-infinite-scroll (ionInfinite)="loadMore($event)" [disabled]="!hasMoreQuotes">
+            <ion-infinite-scroll-content loadingSpinner="bubbles" loadingText="Cargando más frases...">
+            </ion-infinite-scroll-content>
+          </ion-infinite-scroll>
+        </ng-container>
+      </div>
+
     </div>
   </div>
+
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed" class="animate-pop-in">
+    <ion-fab-button class="custom-fab" (click)="addQuote()">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
 
   <ion-toast [isOpen]="isToastOpen" [message]="toastMessage" [duration]="2000" (didDismiss)="isToastOpen = false"
     position="bottom" color="dark"></ion-toast>

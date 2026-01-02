@@ -1,0 +1,42 @@
+<ion-header class="ion-no-border">
+    <ion-toolbar style="--background: transparent;">
+        <ion-title>Inspirar a otros</ion-title>
+        <ion-buttons slot="end">
+            <ion-button (click)="close()">
+                <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+            </ion-button>
+        </ion-buttons>
+    </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+    <div class="modal-wrapper">
+        <div class="background-gradient"></div>
+
+        <div class="input-card">
+            <div class="icon-header">
+                <ion-icon name="pencil-outline"></ion-icon>
+            </div>
+
+            <p class="instruction">
+                Escribe esa frase que cambió tu día...
+            </p>
+
+            <div class="textarea-wrapper">
+                <ion-textarea [(ngModel)]="content" placeholder="Ej: 'Cree que puedes y lo harás...'" rows="4"
+                    autoGrow="true" class="custom-textarea" [maxlength]="maxLength"></ion-textarea>
+                <div class="char-counter" [class.warning]="content.length > maxLength * 0.9"
+                    [class.danger]="content.length >= maxLength">
+                    {{ content.length }} / {{ maxLength }}
+                </div>
+            </div>
+
+            <div class="actions">
+                <ion-button expand="block" class="submit-btn" (click)="submit()"
+                    [disabled]="!content.trim() || content.length > maxLength">
+                    Publicar Frase
+                </ion-button>
+            </div>
+        </div>
+    </div>
+</ion-content>

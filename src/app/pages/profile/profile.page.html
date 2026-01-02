@@ -1,0 +1,113 @@
+<ion-header class="ion-no-border">
+    <ion-toolbar>
+        <ion-buttons slot="start">
+            <ion-back-button defaultHref="/home"></ion-back-button>
+        </ion-buttons>
+        <ion-title>Mi Perfil</ion-title>
+        <ion-buttons slot="end">
+            <ion-button (click)="logout()">
+                <ion-icon name="log-out-outline" slot="icon-only"></ion-icon>
+            </ion-button>
+        </ion-buttons>
+    </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+    <div class="profile-wrapper">
+        <div class="background-gradient"></div>
+
+        <!-- Profile Header -->
+        <div class="profile-header" *ngIf="!loading">
+            <div class="avatar-large">
+                {{ userProfile?.username?.charAt(0).toUpperCase() }}
+            </div>
+
+            <div class="username-section">
+                <div *ngIf="!editingUsername" class="username-display">
+                    <h2>{{ userProfile?.username }}</h2>
+                    <ion-button fill="clear" size="small" (click)="startEditUsername()">
+                        <ion-icon name="create-outline" slot="start"></ion-icon>
+                        Editar
+                    </ion-button>
+                </div>
+
+                <div *ngIf="editingUsername" class="username-edit">
+                    <ion-input [(ngModel)]="newUsername" placeholder="Nuevo nombre de usuario"
+                        class="edit-input"></ion-input>
+                    <div class="edit-actions">
+                        <ion-button fill="clear" (click)="cancelEditUsername()">
+                            <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+                        </ion-button>
+                        <ion-button fill="solid" (click)="saveUsername()">
+                            <ion-icon name="checkmark-outline" slot="icon-only"></ion-icon>
+                        </ion-button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats">
+                <div class="stat-item">
+                    <span class="stat-number">{{ userQuotes.length }}</span>
+                    <span class="stat-label">Frases</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">{{ totalLikes }}</span>
+                    <span class="stat-label">Likes</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">{{ totalReports }}</span>
+                    <span class="stat-label">Reportes</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div class="profile-header" *ngIf="loading">
+            <ion-skeleton-text animated
+                style="width: 120px; height: 120px; border-radius: 50%; margin: 0 auto;"></ion-skeleton-text>
+            <ion-skeleton-text animated style="width: 200px; height: 30px; margin: 1rem auto;"></ion-skeleton-text>
+            <ion-skeleton-text animated style="width: 300px; height: 60px; margin: 1rem auto;"></ion-skeleton-text>
+        </div>
+
+        <!-- User Quotes Section -->
+        <div class="quotes-section">
+            <h3 class="section-title">Mis Frases Publicadas</h3>
+
+            <!-- Loading -->
+            <div *ngIf="quotesLoading" class="quotes-list">
+                <div *ngFor="let i of [1,2,3]" class="quote-card">
+                    <ion-skeleton-text animated
+                        style="width: 90%; height: 20px; margin-bottom: 10px;"></ion-skeleton-text>
+                    <ion-skeleton-text animated
+                        style="width: 70%; height: 20px; margin-bottom: 10px;"></ion-skeleton-text>
+                    <ion-skeleton-text animated style="width: 40%; height: 15px;"></ion-skeleton-text>
+                </div>
+            </div>
+
+            <!-- Quotes List -->
+            <div *ngIf="!quotesLoading && userQuotes.length > 0" class="quotes-list">
+                <div *ngFor="let quote of userQuotes" class="quote-card">
+                    <p class="quote-text">"{{ quote.quote }}"</p>
+                    <div class="quote-meta">
+                        <div class="meta-left">
+                            <span class="quote-likes">❤️ {{ quote.likes_count || 0 }}</span>
+                            <span class="quote-date">{{ formatDate(quote.created_at) }}</span>
+                        </div>
+                        <ion-button fill="clear" size="small" class="delete-btn" (click)="deleteQuote(quote)">
+                            <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+                        </ion-button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div *ngIf="!quotesLoading && userQuotes.length === 0" class="empty-state">
+                <p>Aún no has publicado ninguna frase</p>
+                <ion-button routerLink="/home">Publicar mi primera frase</ion-button>
+            </div>
+        </div>
+    </div>
+
+    <ion-toast [isOpen]="isToastOpen" [message]="toastMessage" [duration]="2000"
+        (didDismiss)="isToastOpen = false"></ion-toast>
+</ion-content>
