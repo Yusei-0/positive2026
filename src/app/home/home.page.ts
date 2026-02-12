@@ -30,22 +30,14 @@ import { addIcons } from 'ionicons';
 import {
   refreshOutline,
   heartOutline,
-  shareSocialOutline,
-  logoWhatsapp,
-  downloadOutline,
-  copyOutline,
   heart,
   add,
   flagOutline,
 } from 'ionicons/icons';
-import html2canvas from 'html2canvas';
-import { environment } from 'src/environments/environment';
-import { SupabaseService } from '../services/supabase.service';
-import { Router } from '@angular/router';
 import { FeedService } from '../services/feed.service';
-import { Clipboard as CapacitorClipboard } from '@capacitor/clipboard';
-import { Share } from '@capacitor/share';
-import { Filesystem, Directory } from '@capacitor/filesystem';
+// import { Clipboard as CapacitorClipboard } from '@capacitor/clipboard';
+// import { Share } from '@capacitor/share';
+// import { Filesystem, Directory } from '@capacitor/filesystem';
 
 @Component({
   selector: 'app-home',
@@ -103,15 +95,7 @@ export class HomePage implements OnInit {
     private router: Router,
     private feedService: FeedService
   ) {
-    addIcons({
-      shareSocialOutline,
-      copyOutline,
-      flagOutline,
-      add,
-      heartOutline,
-      heart,
-      refreshOutline,
-    });
+    addIcons({add, flagOutline, heartOutline, heart, refreshOutline,});
     this.dailySeed = this.feedService.getDailySeed();
   }
 
@@ -432,256 +416,16 @@ export class HomePage implements OnInit {
     }
   }
 
-  async generateImageBlob(elementId: string): Promise<Blob | null> {
-    const original = document.getElementById(elementId);
-    if (!original) return null;
+  /* async downloadImage(elementId: string) {
+      // Removed functionality
+  } */
 
-    const wrapper = document.createElement('div');
-    wrapper.style.position = 'absolute';
-    wrapper.style.top = '-9999px';
-    wrapper.style.left = '-9999px';
-    wrapper.style.width = '1080px';
-    wrapper.style.height = '1080px';
-    wrapper.style.background = 'linear-gradient(135deg, #f0f7d1 0%, #c3cfe2 100%)';
-    wrapper.style.display = 'flex';
-    wrapper.style.flexDirection = 'column';
-    wrapper.style.alignItems = 'center';
-    wrapper.style.justifyContent = 'center';
-    wrapper.style.padding = '80px';
-    wrapper.style.boxSizing = 'border-box';
-    wrapper.style.fontFamily = "'Outfit', sans-serif";
-
-    const card = document.createElement('div');
-    card.style.background = 'rgba(255, 255, 255, 0.85)';
-    card.style.backdropFilter = 'blur(20px)';
-    card.style.borderRadius = '40px';
-    card.style.padding = '80px 60px';
-    card.style.width = '100%';
-    card.style.maxWidth = '850px';
-    card.style.boxShadow = '0 30px 60px rgba(0,0,0,0.08), 0 0 0 1px rgba(255,255,255,0.5) inset';
-    card.style.display = 'flex';
-    card.style.flexDirection = 'column';
-    card.style.alignItems = 'center';
-    card.style.justifyContent = 'center';
-    card.style.textAlign = 'center';
-    card.style.position = 'relative';
-
-    const textEl = original.querySelector('.com-text') || original.querySelector('h1') || original.querySelector('.quote-text');
-    let noteText = textEl?.textContent?.trim() || '';
-    noteText = noteText.replace(/^"|"$/g, '');
-
-    const authorEl = original.querySelector('.com-author') || original.querySelector('.quote-author') || original.querySelector('p:not(.com-text)');
-    let authorText = authorEl?.textContent?.trim() || 'Anónimo';
-    authorText = authorText.replace(/^—\s*/, '');
-
-    const quoteIcon = document.createElement('div');
-    quoteIcon.innerHTML = '❝';
-    quoteIcon.style.fontSize = '120px';
-    quoteIcon.style.height = '80px';
-    quoteIcon.style.lineHeight = '120px';
-    quoteIcon.style.color = '#56ab2f';
-    quoteIcon.style.opacity = '0.3';
-    quoteIcon.style.fontFamily = 'serif';
-    quoteIcon.style.marginBottom = '20px';
-    card.appendChild(quoteIcon);
-
-    const textNode = document.createElement('h1');
-    textNode.innerText = noteText;
-    textNode.style.fontSize = noteText.length > 100 ? '42px' : '56px';
-    textNode.style.fontWeight = '700';
-    textNode.style.color = '#2d3436';
-    textNode.style.lineHeight = '1.3';
-    textNode.style.margin = '0 0 30px 0';
-    textNode.style.letterSpacing = '-1px';
-    card.appendChild(textNode);
-
-    const sep = document.createElement('div');
-    sep.style.width = '60px';
-    sep.style.height = '6px';
-    sep.style.background = '#56ab2f';
-    sep.style.borderRadius = '3px';
-    sep.style.margin = '0 auto 30px auto';
-    card.appendChild(sep);
-
-    const authorNode = document.createElement('p');
-    authorNode.innerText = authorText;
-    authorNode.style.fontSize = '32px';
-    authorNode.style.fontWeight = '500';
-    authorNode.style.color = '#636e72';
-    authorNode.style.margin = '0';
-    card.appendChild(authorNode);
-
-    wrapper.appendChild(card);
-
-    const footer = document.createElement('div');
-    footer.style.marginTop = '60px';
-    footer.style.display = 'flex';
-    footer.style.flexDirection = 'row';
-    footer.style.alignItems = 'center';
-    footer.style.gap = '20px';
-
-    const logoContainer = document.createElement('div');
-    logoContainer.style.background = 'rgba(255, 255, 255, 0.9)';
-    logoContainer.style.backdropFilter = 'blur(10px)';
-    logoContainer.style.borderRadius = '25px';
-    logoContainer.style.padding = '12px';
-    logoContainer.style.display = 'flex';
-    logoContainer.style.alignItems = 'center';
-    logoContainer.style.justifyContent = 'center';
-    logoContainer.style.boxShadow = '0 8px 16px rgba(0,0,0,0.1)';
-
-    const logoImg = new Image();
-    logoImg.src = 'assets/logo.svg';
-    logoImg.style.width = '90px';
-    logoImg.style.height = '90px';
-    logoImg.style.objectFit = 'contain';
-
-    logoContainer.appendChild(logoImg);
-    footer.appendChild(logoContainer);
-
-    const brandName = document.createElement('span');
-    brandName.innerText = 'Positive 2026';
-    brandName.style.fontSize = '36px';
-    brandName.style.fontWeight = '700';
-    brandName.style.color = '#2d3436';
-    brandName.style.letterSpacing = '1px';
-    brandName.style.textTransform = 'uppercase';
-    brandName.style.opacity = '0.8';
-    footer.appendChild(brandName);
-
-    wrapper.appendChild(footer);
-    document.body.appendChild(wrapper);
-
-    try {
-      await new Promise((r) => setTimeout(r, 150));
-      const canvas = await html2canvas(wrapper, {
-        scale: 1,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: null,
-        logging: false,
-      });
-      document.body.removeChild(wrapper);
-      // Usar JPEG en lugar de PNG reduce drásticamente el tamaño del base64 final
-      // Esto evita el error "TransactionTooLargeException" al pasar datos al portapapeles en Android
-      return new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.8));
-    } catch (e) {
-      document.body.removeChild(wrapper);
-      console.error(e);
-      return null;
-    }
-  }
-
-  private blobToBase64(blob: Blob): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onerror = reject;
-      reader.onload = () => {
-        resolve(reader.result as string);
-      };
-      reader.readAsDataURL(blob);
-    });
-  }
-
-  async shareImage(elementId: string = 'main-quote-card') {
-    const loading = await this.loadingController.create({
-      message: 'Preparando imagen...',
-      spinner: 'crescent',
-      translucent: true,
-    });
-    await loading.present();
-
-    try {
-      const blob = await this.generateImageBlob(elementId);
-      if (!blob) throw new Error('Blob generation failed');
-
-      const base64Data = await this.blobToBase64(blob);
-      const fileName = `positive_quote_${new Date().getTime()}.png`;
-
-      try {
-        const savedFile = await Filesystem.writeFile({
-          path: fileName,
-          data: base64Data,
-          directory: Directory.Cache
-        });
-
-        await loading.dismiss(); // Dismiss before showing native share sheet
-
-        await Share.share({
-          title: 'Positive 2026',
-          text: `"${this.quote}" — ${this.author}`,
-          files: [savedFile.uri],
-          dialogTitle: 'Compartir frases'
-        });
-
-      } catch (err) {
-          console.error('Native share failed', err);
-          await loading.dismiss();
-          
-          if (navigator.share) {
-             const file = new File([blob], 'positive.png', { type: 'image/png' });
-             await navigator.share({
-                files: [file],
-                title: 'Positive 2026',
-                text: 'Mira esta frase ✨',
-             });
-          } else {
-             this.downloadBlob(blob);
-          }
-      }
-    } catch (e) {
-      console.error(e);
-      await loading.dismiss();
-      this.presentToast('No se pudo compartir');
-    }
-  }
-
-  async copyImage(elementId: string = 'main-quote-card') {
-    const loading = await this.loadingController.create({
-      message: 'Copiando...',
-      spinner: 'crescent',
-      translucent: true,
-      duration: 3000 // Timeout de seguridad
-    });
-    await loading.present();
-
-    try {
-      const blob = await this.generateImageBlob(elementId);
-      if (!blob) throw new Error('Blob generation failed');
-
-      const base64data = await this.blobToBase64(blob);
-        
-      try {
-        await CapacitorClipboard.write({
-          image: base64data
-        });
-        await loading.dismiss();
-        this.presentToast('Imagen copiada al portapapeles');
-      } catch (err) {
-          console.error('Clipboard image error', err);
-          await CapacitorClipboard.write({
-              string: `"${this.quote}" — ${this.author}\n\nDescubre más en Positive 2026 ✨`
-          });
-          await loading.dismiss();
-          this.presentToast('Texto copiado (Imagen no soportada)');
-      }
-    } catch (e) {
-      console.error(e);
-      await loading.dismiss();
-      this.presentToast('Error al copiar');
-    }
-  }
+  /* downloadBlob(blob: Blob) {
+     // Removed functionality
+  } */
 
   trackById(index: number, item: any): string {
     return item.id;
-  }
-
-  downloadBlob(blob: Blob) {
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'positive_vibes.png';
-    link.click();
-    this.presentToast('Imagen descargada');
   }
 
   presentToast(message: string) {
