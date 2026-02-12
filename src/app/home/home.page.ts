@@ -54,25 +54,18 @@ import { Filesystem, Directory } from '@capacitor/filesystem';
   standalone: true,
   imports: [
     CommonModule,
-    IonHeader,
-    IonToolbar,
-    IonTitle,
     IonContent,
-    IonCard,
-    IonCardContent,
+
     IonButton,
     IonIcon,
-    IonSpinner,
-    IonButtons,
+   
     IonToast,
     IonFab,
     IonFabButton,
-    IonList,
-    IonItem,
+ 
     IonInfiniteScroll,
     IonInfiniteScrollContent,
-    IonLabel,
-    IonAvatar,
+   
     IonSkeletonText,
   ],
 })
@@ -560,12 +553,13 @@ export class HomePage implements OnInit {
     document.body.appendChild(wrapper);
 
     try {
-      await new Promise((r) => setTimeout(r, 100));
+      await new Promise((r) => setTimeout(r, 150));
       const canvas = await html2canvas(wrapper, {
-        scale: 2,
+        scale: 1,
         useCORS: true,
         allowTaint: true,
         backgroundColor: null,
+        logging: false,
       });
       document.body.removeChild(wrapper);
       return new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));

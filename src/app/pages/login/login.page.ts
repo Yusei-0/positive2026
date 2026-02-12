@@ -35,11 +35,8 @@ import { AppLogoComponent } from '../../components/app-logo/app-logo.component';
     CommonModule,
     FormsModule,
     IonContent,
-    IonHeader,
-    IonTitle,
-    IonToolbar,
+
     IonItem,
-    IonLabel,
     IonInput,
     IonButton,
     IonToast,
