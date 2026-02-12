@@ -562,7 +562,9 @@ export class HomePage implements OnInit {
         logging: false,
       });
       document.body.removeChild(wrapper);
-      return new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+      // Usar JPEG en lugar de PNG reduce drásticamente el tamaño del base64 final
+      // Esto evita el error "TransactionTooLargeException" al pasar datos al portapapeles en Android
+      return new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.8));
     } catch (e) {
       document.body.removeChild(wrapper);
       console.error(e);
