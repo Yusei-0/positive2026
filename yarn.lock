@@ -1289,6 +1289,11 @@
     "@babel/helper-string-parser" "^7.27.1"
     "@babel/helper-validator-identifier" "^7.28.5"
 
+"@capacitor/android@^8.0.0":
+  version "8.0.0"
+  resolved "https://registry.npmjs.org/@capacitor/android/-/android-8.0.0.tgz"
+  integrity sha512-FrBSvVAC5JuLaYHNyDnwQny0/SYnP+xDQbc/KA4wInmRkMXLDv22fkx9aBJIDrxjuUVd+jsRih4SAt8FgMEzCw==
+
 "@capacitor/assets@^3.0.5":
   version "3.0.5"
   resolved "https://registry.npmjs.org/@capacitor/assets/-/assets-3.0.5.tgz"
@@ -1330,7 +1335,7 @@
     tslib "^2.4.0"
     xml2js "^0.5.0"
 
-"@capacitor/core@>=8.0.0":
+"@capacitor/core@^8.0.0", "@capacitor/core@>=8.0.0":
   version "8.0.0"
   resolved "https://registry.npmjs.org/@capacitor/core/-/core-8.0.0.tgz"
   integrity sha512-250HTVd/W/KdMygoqaedisvNbHbpbQTN2Hy/8ZYGm1nAqE0Fx7sGss4l0nDg33STxEdDhtVRoL2fIaaiukKseA==
