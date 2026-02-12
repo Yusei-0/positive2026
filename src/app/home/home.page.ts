@@ -1,16 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
-
   IonContent,
-
   IonButton,
   IonIcon,
-
   IonToast,
   IonFab,
   IonFabButton,
- 
   IonSkeletonText,
   AlertController,
   ModalController,
@@ -26,10 +22,12 @@ import {
   heart,
   add,
   flagOutline,
+  shareSocialOutline,
 } from 'ionicons/icons';
 import { FeedService } from '../services/feed.service';
 import { environment } from 'src/environments/environment';
 import { SupabaseService } from '../services/supabase.service';
+import { Share } from '@capacitor/share';
 import { Router } from '@angular/router';
 
 @Component({
@@ -40,17 +38,13 @@ import { Router } from '@angular/router';
   imports: [
     CommonModule,
     IonContent,
-
     IonButton,
     IonIcon,
-   
     IonToast,
     IonFab,
     IonFabButton,
- 
     IonInfiniteScroll,
     IonInfiniteScrollContent,
-   
     IonSkeletonText,
   ],
 })
@@ -85,10 +79,17 @@ export class HomePage implements OnInit {
     private modalController: ModalController,
     private loadingController: LoadingController,
     private supabaseService: SupabaseService,
-    private router: Router,
+    private router: Router  ,
     private feedService: FeedService
   ) {
-    addIcons({add, flagOutline, heartOutline, heart, refreshOutline,});
+    addIcons({
+      add,
+      flagOutline,
+      heartOutline,
+      heart,
+      refreshOutline,
+      shareSocialOutline,
+    });
     this.dailySeed = this.feedService.getDailySeed();
   }
 
@@ -289,18 +290,32 @@ export class HomePage implements OnInit {
       const authors = JSON.parse(authorsStr);
 
       if (phrases.length > 0) {
-        const randomPhrase = phrases[Math.floor(Math.random() * phrases.length)];
+        const randomPhrase =
+          phrases[Math.floor(Math.random() * phrases.length)];
         let authorName = 'Anónimo';
         if (randomPhrase.author_id) {
-          const found = authors.find((a: any) => a.id == randomPhrase.author_id);
+          const found = authors.find(
+            (a: any) => a.id == randomPhrase.author_id
+          );
           if (found) authorName = found.name;
         } else if (randomPhrase.author) {
           authorName = randomPhrase.author;
         }
-        const text = randomPhrase.text || randomPhrase.phrase || randomPhrase.content || randomPhrase.cita;
+        const text =
+          randomPhrase.text ||
+          randomPhrase.phrase ||
+          randomPhrase.content ||
+          randomPhrase.cita;
         this.quote = text;
         this.author = authorName;
-        localStorage.setItem('daily_quote_obj', JSON.stringify({ date: todayStr, quote: this.quote, author: this.author }));
+        localStorage.setItem(
+          'daily_quote_obj',
+          JSON.stringify({
+            date: todayStr,
+            quote: this.quote,
+            author: this.author,
+          })
+        );
         return;
       }
     }
@@ -309,10 +324,18 @@ export class HomePage implements OnInit {
 
   useFallbackQuote() {
     const fallbackOptions = [
-      { content: 'La única forma de hacer un gran trabajo es amar lo que haces.', author: 'Steve Jobs' },
-      { content: 'Cree que puedes y ya estarás a medio camino.', author: 'Theodore Roosevelt' },
+      {
+        content:
+          'La única forma de hacer un gran trabajo es amar lo que haces.',
+        author: 'Steve Jobs',
+      },
+      {
+        content: 'Cree que puedes y ya estarás a medio camino.',
+        author: 'Theodore Roosevelt',
+      },
     ];
-    const random = fallbackOptions[Math.floor(Math.random() * fallbackOptions.length)];
+    const random =
+      fallbackOptions[Math.floor(Math.random() * fallbackOptions.length)];
     this.quote = random.content;
     this.author = random.author;
   }
@@ -333,13 +356,21 @@ export class HomePage implements OnInit {
     quote.likes += quote.liked ? 1 : -1;
 
     try {
-      const { data: { user } } = await this.supabaseService.getUser();
+      const {
+        data: { user },
+      } = await this.supabaseService.getUser();
       if (!user) throw new Error('No user');
       if (quote.liked) {
-        const { error } = await this.supabaseService.likeQuote(quote.id, user.id);
+        const { error } = await this.supabaseService.likeQuote(
+          quote.id,
+          user.id
+        );
         if (error) throw error;
       } else {
-        const { error } = await this.supabaseService.unlikeQuote(quote.id, user.id);
+        const { error } = await this.supabaseService.unlikeQuote(
+          quote.id,
+          user.id
+        );
         if (error) throw error;
       }
     } catch (e) {
@@ -357,7 +388,8 @@ export class HomePage implements OnInit {
     }
     const alert = await this.alertController.create({
       header: 'Reportar Contenido',
-      message: '¿Estás seguro de que quieres reportar esta frase como inapropiada?',
+      message:
+        '¿Estás seguro de que quieres reportar esta frase como inapropiada?',
       buttons: [
         { text: 'Cancelar', role: 'cancel' },
         {
@@ -365,13 +397,20 @@ export class HomePage implements OnInit {
           role: 'destructive',
           handler: async () => {
             try {
-              const { error } = await this.supabaseService.reportQuote(quote.id, this.userProfile.id);
+              const { error } = await this.supabaseService.reportQuote(
+                quote.id,
+                this.userProfile.id
+              );
               if (error) throw error;
               this.presentToast('Gracias. Revisaremos el contenido reportado.');
-              this.communityQuotes = this.communityQuotes.filter((q) => q.id !== quote.id);
+              this.communityQuotes = this.communityQuotes.filter(
+                (q) => q.id !== quote.id
+              );
             } catch (e) {
               console.error('Report error', e);
-              this.presentToast('Error al enviar el reporte. Inténtalo de nuevo.');
+              this.presentToast(
+                'Error al enviar el reporte. Inténtalo de nuevo.'
+              );
             }
           },
         },
@@ -396,7 +435,9 @@ export class HomePage implements OnInit {
     if (role === 'confirm' && data) {
       this.presentToast('Publicando...');
       try {
-        const { data: { user } } = await this.supabaseService.getUser();
+        const {
+          data: { user },
+        } = await this.supabaseService.getUser();
         if (!user) throw new Error('No user');
         const { error } = await this.supabaseService.createQuote(data, user.id);
         if (error) throw error;
@@ -416,6 +457,45 @@ export class HomePage implements OnInit {
   /* downloadBlob(blob: Blob) {
      // Removed functionality
   } */
+
+  async shareQuote(
+    quoteContent: string = this.quote,
+    quoteAuthor: string = this.author
+  ) {
+    const text = `"${quoteContent}" — ${quoteAuthor}\n\nDescubre más en Positive 2026 ✨`;
+
+    try {
+      await Share.share({
+        title: 'Positive 2026',
+        text: text,
+        dialogTitle: 'Compartir frase',
+      });
+    } catch (e) {
+      console.error('Share failed', e);
+      // Fallback para web si Share API no está disponible (aunque Capacitor lo maneja bien)
+      if (navigator.share) {
+        navigator
+          .share({
+            title: 'Positive 2026',
+            text: text,
+          })
+          .catch((err) => console.error('Web share failed', err));
+      } else {
+        // Fallback final: Copiar al portapapeles (usando API web simple)
+        this.copyToClipboard(text);
+      }
+    }
+  }
+
+  async copyToClipboard(text: string) {
+    try {
+      await navigator.clipboard.writeText(text);
+      this.presentToast('Frase copiada al portapapeles');
+    } catch (err) {
+      console.error('Clipboard failed', err);
+      this.presentToast('No se pudo compartir');
+    }
+  }
 
   trackById(index: number, item: any): string {
     return item.id;

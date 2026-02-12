@@ -48,6 +48,9 @@
                 <ion-icon [name]="mainLiked ? 'heart' : 'heart-outline'"></ion-icon>
                 <span style="font-size: 0.9rem; margin-left: 5px;" *ngIf="mainLikes > 0">{{ mainLikes }}</span>
               </ion-button> -->
+              <ion-button fill="clear" color="dark" (click)="shareQuote()" class="action-btn">
+                  <ion-icon slot="icon-only" name="share-social-outline"></ion-icon>
+              </ion-button>
             </div>
           </div>
         </ng-container>
@@ -114,9 +117,9 @@
                   </ion-button>
                 </div>
                 <div class="right-actions">
-                  <!-- <ion-button fill="clear" size="small" color="medium" (click)="reportQuote(comQuote)">
-                    <ion-icon slot="icon-only" name="flag-outline"></ion-icon>
-                  </ion-button> -->
+                  <ion-button fill="clear" size="small" color="medium" (click)="shareQuote(comQuote.content, comQuote.author)">
+                    <ion-icon slot="icon-only" name="share-social-outline"></ion-icon>
+                  </ion-button>
                 </div>
               </div>
             </div>
