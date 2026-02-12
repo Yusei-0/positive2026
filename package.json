@@ -28,6 +28,7 @@
     "@angular/platform-browser-dynamic": "^20.0.0",
     "@angular/router": "^20.0.0",
     "@capacitor/android": "^8.0.0",
+    "@capacitor/clipboard": "^8.0.1",
     "@capacitor/local-notifications": "^8.0.0",
     "@ionic/angular": "^8.0.0",
     "@supabase/supabase-js": "^2.89.0",

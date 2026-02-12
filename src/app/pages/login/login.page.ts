@@ -79,15 +79,19 @@ export class LoginPage {
       this.presentToast('¡Código enviado! Revisa tu email.');
     } catch (e: any) {
       console.error(e);
-      this.presentToast('Error al enviar código: ' + e.message);
+      if (e.message?.includes('rate limit') || e.status === 429) {
+        this.presentToast('Demasiados intentos. Por favor espera unos minutos.');
+      } else {
+        this.presentToast('Error al enviar código: ' + e.message);
+      }
     } finally {
       this.loading = false;
     }
   }
 
   async verifyCode() {
-    if (!this.otp || this.otp.length < 6) {
-      this.presentToast('Ingresa el código de 6 dígitos');
+    if (!this.otp || this.otp.length < 8) {
+      this.presentToast('Ingresa el código de 8 dígitos');
       return;
     }
 

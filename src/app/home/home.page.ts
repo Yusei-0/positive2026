@@ -21,6 +21,7 @@ import {
   IonSkeletonText,
   AlertController,
   ModalController,
+  LoadingController,
   IonInfiniteScroll,
   IonInfiniteScrollContent,
 } from '@ionic/angular/standalone';
@@ -42,6 +43,9 @@ import { environment } from 'src/environments/environment';
 import { SupabaseService } from '../services/supabase.service';
 import { Router } from '@angular/router';
 import { FeedService } from '../services/feed.service';
+import { Clipboard as CapacitorClipboard } from '@capacitor/clipboard';
+import { Share } from '@capacitor/share';
+import { Filesystem, Directory } from '@capacitor/filesystem';
 
 @Component({
   selector: 'app-home',
@@ -85,7 +89,6 @@ export class HomePage implements OnInit {
   // Community State
   communityQuotes: any[] = [];
   communityLoading: boolean = true;
-
   communityError: boolean = false;
 
   // Pagination State
@@ -102,6 +105,7 @@ export class HomePage implements OnInit {
   constructor(
     private alertController: AlertController,
     private modalController: ModalController,
+    private loadingController: LoadingController,
     private supabaseService: SupabaseService,
     private router: Router,
     private feedService: FeedService
@@ -249,12 +253,10 @@ export class HomePage implements OnInit {
   }
 
   async ensureDataAvailable() {
-    // Check if we have data cached
     const cachedPhrases = localStorage.getItem('cached_phrases');
     const cachedAuthors = localStorage.getItem('cached_authors');
 
     if (!cachedPhrases || !cachedAuthors) {
-      // Fetch All Data
       console.log('Fetching fresh data...');
       const [phrasesResponse, authorsResponse] = await Promise.all([
         fetch(`${environment.apiur}phrases/esp`),
@@ -265,7 +267,6 @@ export class HomePage implements OnInit {
         const phrases = await phrasesResponse.json();
         const authors = await authorsResponse.json();
 
-        // Normalize phrases array
         let cleanPhrases = [];
         if (Array.isArray(phrases)) cleanPhrases = phrases;
         else if (phrases.results) cleanPhrases = phrases.results;
@@ -281,7 +282,6 @@ export class HomePage implements OnInit {
   async loadDailyQuote() {
     const today = new Date().toISOString().split('T')[0];
 
-    // 1. Try fetching from Supabase (Official Daily Quote)
     try {
       const { data, error } = await this.supabaseService.getDailyQuote(today);
       if (data) {
@@ -295,9 +295,6 @@ export class HomePage implements OnInit {
       console.warn('Supabase fetch failed', err);
     }
 
-    // 2. Fallback: Internal logic (previously "Local Caching Strategy")
-    // If Supabase has no quote for today, we use our robust fallback logic
-    // which eventually uses the external API or local phrases.
     console.log('Using Fallback Strategy for Daily Quote');
     await this.ensureDataAvailable();
 
@@ -322,38 +319,18 @@ export class HomePage implements OnInit {
       const authors = JSON.parse(authorsStr);
 
       if (phrases.length > 0) {
-        const randomPhrase =
-          phrases[Math.floor(Math.random() * phrases.length)];
-
-        // Resolve author
+        const randomPhrase = phrases[Math.floor(Math.random() * phrases.length)];
         let authorName = 'Anónimo';
         if (randomPhrase.author_id) {
-          const found = authors.find(
-            (a: any) => a.id == randomPhrase.author_id
-          );
+          const found = authors.find((a: any) => a.id == randomPhrase.author_id);
           if (found) authorName = found.name;
         } else if (randomPhrase.author) {
           authorName = randomPhrase.author;
         }
-
-        const text =
-          randomPhrase.text ||
-          randomPhrase.phrase ||
-          randomPhrase.content ||
-          randomPhrase.cita;
-
+        const text = randomPhrase.text || randomPhrase.phrase || randomPhrase.content || randomPhrase.cita;
         this.quote = text;
         this.author = authorName;
-
-        // Save for today
-        localStorage.setItem(
-          'daily_quote_obj',
-          JSON.stringify({
-            date: todayStr,
-            quote: this.quote,
-            author: this.author,
-          })
-        );
+        localStorage.setItem('daily_quote_obj', JSON.stringify({ date: todayStr, quote: this.quote, author: this.author }));
         return;
       }
     }
@@ -362,18 +339,10 @@ export class HomePage implements OnInit {
 
   useFallbackQuote() {
     const fallbackOptions = [
-      {
-        content:
-          'La única forma de hacer un gran trabajo es amar lo que haces.',
-        author: 'Steve Jobs',
-      },
-      {
-        content: 'Cree que puedes y ya estarás a medio camino.',
-        author: 'Theodore Roosevelt',
-      },
+      { content: 'La única forma de hacer un gran trabajo es amar lo que haces.', author: 'Steve Jobs' },
+      { content: 'Cree que puedes y ya estarás a medio camino.', author: 'Theodore Roosevelt' },
     ];
-    const random =
-      fallbackOptions[Math.floor(Math.random() * fallbackOptions.length)];
+    const random = fallbackOptions[Math.floor(Math.random() * fallbackOptions.length)];
     this.quote = random.content;
     this.author = random.author;
   }
@@ -383,43 +352,28 @@ export class HomePage implements OnInit {
     this.mainLikes += this.mainLiked ? 1 : -1;
   }
 
-  // --- Community Logic ---
-
   async toggleLike(quote: any) {
     if (!this.userProfile) {
       this.presentToast('Debes iniciar sesión para dar like');
       return;
     }
-
     const previousLiked = quote.liked;
     const previousLikes = quote.likes;
-
-    // Optimistic UI update
     quote.liked = !quote.liked;
     quote.likes += quote.liked ? 1 : -1;
 
     try {
-      const {
-        data: { user },
-      } = await this.supabaseService.getUser();
+      const { data: { user } } = await this.supabaseService.getUser();
       if (!user) throw new Error('No user');
-
       if (quote.liked) {
-        const { error } = await this.supabaseService.likeQuote(
-          quote.id,
-          user.id
-        );
+        const { error } = await this.supabaseService.likeQuote(quote.id, user.id);
         if (error) throw error;
       } else {
-        const { error } = await this.supabaseService.unlikeQuote(
-          quote.id,
-          user.id
-        );
+        const { error } = await this.supabaseService.unlikeQuote(quote.id, user.id);
         if (error) throw error;
       }
     } catch (e) {
       console.error('Like error', e);
-      // Revert on error
       quote.liked = previousLiked;
       quote.likes = previousLikes;
       this.presentToast('Error al dar like');
@@ -431,76 +385,51 @@ export class HomePage implements OnInit {
       this.presentToast('Debes iniciar sesión para reportar');
       return;
     }
-
     const alert = await this.alertController.create({
       header: 'Reportar Contenido',
-      message:
-        '¿Estás seguro de que quieres reportar esta frase como inapropiada?',
+      message: '¿Estás seguro de que quieres reportar esta frase como inapropiada?',
       buttons: [
-        {
-          text: 'Cancelar',
-          role: 'cancel',
-        },
+        { text: 'Cancelar', role: 'cancel' },
         {
           text: 'Reportar',
           role: 'destructive',
           handler: async () => {
             try {
-              const { error } = await this.supabaseService.reportQuote(
-                quote.id,
-                this.userProfile.id
-              );
+              const { error } = await this.supabaseService.reportQuote(quote.id, this.userProfile.id);
               if (error) throw error;
-
               this.presentToast('Gracias. Revisaremos el contenido reportado.');
-              // Optionally hide the quote locally
-              this.communityQuotes = this.communityQuotes.filter(
-                (q) => q.id !== quote.id
-              );
+              this.communityQuotes = this.communityQuotes.filter((q) => q.id !== quote.id);
             } catch (e) {
               console.error('Report error', e);
-              this.presentToast(
-                'Error al enviar el reporte. Inténtalo de nuevo.'
-              );
+              this.presentToast('Error al enviar el reporte. Inténtalo de nuevo.');
             }
           },
         },
       ],
     });
-
     await alert.present();
   }
 
   async addQuote() {
-    // Check auth
     if (!this.userProfile) {
       this.presentToast('Debes iniciar sesión para publicar');
       return;
     }
-
     const modal = await this.modalController.create({
       component: CreateQuoteModalComponent,
       breakpoints: [0, 1],
       initialBreakpoint: 1,
       cssClass: 'custom-modal',
     });
-
     await modal.present();
-
     const { data, role } = await modal.onWillDismiss();
-
     if (role === 'confirm' && data) {
       this.presentToast('Publicando...');
       try {
-        const {
-          data: { user },
-        } = await this.supabaseService.getUser();
+        const { data: { user } } = await this.supabaseService.getUser();
         if (!user) throw new Error('No user');
-
         const { error } = await this.supabaseService.createQuote(data, user.id);
-
         if (error) throw error;
-
         this.presentToast('¡Frase publicada con éxito! ✨');
         this.loadCommunityFeed();
       } catch (e) {
@@ -510,24 +439,17 @@ export class HomePage implements OnInit {
     }
   }
 
-  // --- Image Generation Logic ---
-
   async generateImageBlob(elementId: string): Promise<Blob | null> {
     const original = document.getElementById(elementId);
     if (!original) return null;
 
-    // 1. Create wrapper (The Canvas Context)
     const wrapper = document.createElement('div');
     wrapper.style.position = 'absolute';
     wrapper.style.top = '-9999px';
     wrapper.style.left = '-9999px';
     wrapper.style.width = '1080px';
     wrapper.style.height = '1080px';
-
-    // Background: App Signature Gradient
-    wrapper.style.background =
-      'linear-gradient(135deg, #f0f7d1 0%, #c3cfe2 100%)';
-
+    wrapper.style.background = 'linear-gradient(135deg, #f0f7d1 0%, #c3cfe2 100%)';
     wrapper.style.display = 'flex';
     wrapper.style.flexDirection = 'column';
     wrapper.style.alignItems = 'center';
@@ -536,7 +458,6 @@ export class HomePage implements OnInit {
     wrapper.style.boxSizing = 'border-box';
     wrapper.style.fontFamily = "'Outfit', sans-serif";
 
-    // 2. Create the Quote Card (Glassmorphism)
     const card = document.createElement('div');
     card.style.background = 'rgba(255, 255, 255, 0.85)';
     card.style.backdropFilter = 'blur(20px)';
@@ -544,8 +465,7 @@ export class HomePage implements OnInit {
     card.style.padding = '80px 60px';
     card.style.width = '100%';
     card.style.maxWidth = '850px';
-    card.style.boxShadow =
-      '0 30px 60px rgba(0,0,0,0.08), 0 0 0 1px rgba(255,255,255,0.5) inset';
+    card.style.boxShadow = '0 30px 60px rgba(0,0,0,0.08), 0 0 0 1px rgba(255,255,255,0.5) inset';
     card.style.display = 'flex';
     card.style.flexDirection = 'column';
     card.style.alignItems = 'center';
@@ -553,39 +473,25 @@ export class HomePage implements OnInit {
     card.style.textAlign = 'center';
     card.style.position = 'relative';
 
-    // 3. Extract Content from Original Element
-    // Specific selectors first to avoid ambiguity
-    const textEl =
-      original.querySelector('.com-text') ||
-      original.querySelector('h1') ||
-      original.querySelector('.quote-text');
+    const textEl = original.querySelector('.com-text') || original.querySelector('h1') || original.querySelector('.quote-text');
     let noteText = textEl?.textContent?.trim() || '';
-    // Clean up quotes if present in the capture
     noteText = noteText.replace(/^"|"$/g, '');
 
-    const authorEl =
-      original.querySelector('.com-author') ||
-      original.querySelector('.quote-author') ||
-      original.querySelector('p:not(.com-text)');
+    const authorEl = original.querySelector('.com-author') || original.querySelector('.quote-author') || original.querySelector('p:not(.com-text)');
     let authorText = authorEl?.textContent?.trim() || 'Anónimo';
-    // Clean up dash if present
     authorText = authorText.replace(/^—\s*/, '');
 
-    // 4. Build Internal Structure
-
-    // Quote Icon
     const quoteIcon = document.createElement('div');
     quoteIcon.innerHTML = '❝';
     quoteIcon.style.fontSize = '120px';
     quoteIcon.style.height = '80px';
     quoteIcon.style.lineHeight = '120px';
-    quoteIcon.style.color = '#56ab2f'; // Primary Green
+    quoteIcon.style.color = '#56ab2f';
     quoteIcon.style.opacity = '0.3';
     quoteIcon.style.fontFamily = 'serif';
     quoteIcon.style.marginBottom = '20px';
     card.appendChild(quoteIcon);
 
-    // Main Text
     const textNode = document.createElement('h1');
     textNode.innerText = noteText;
     textNode.style.fontSize = noteText.length > 100 ? '42px' : '56px';
@@ -596,7 +502,6 @@ export class HomePage implements OnInit {
     textNode.style.letterSpacing = '-1px';
     card.appendChild(textNode);
 
-    // Separator
     const sep = document.createElement('div');
     sep.style.width = '60px';
     sep.style.height = '6px';
@@ -605,7 +510,6 @@ export class HomePage implements OnInit {
     sep.style.margin = '0 auto 30px auto';
     card.appendChild(sep);
 
-    // Author
     const authorNode = document.createElement('p');
     authorNode.innerText = authorText;
     authorNode.style.fontSize = '32px';
@@ -616,26 +520,23 @@ export class HomePage implements OnInit {
 
     wrapper.appendChild(card);
 
-    // 5. Add Brand Footer (Logo + Name)
     const footer = document.createElement('div');
     footer.style.marginTop = '60px';
     footer.style.display = 'flex';
-    footer.style.flexDirection = 'row'; // Side by side
+    footer.style.flexDirection = 'row';
     footer.style.alignItems = 'center';
     footer.style.gap = '20px';
 
-    // Logo Container
     const logoContainer = document.createElement('div');
-    logoContainer.style.background = 'rgba(255, 255, 255, 0.9)'; // Slightly translucent white or solid
+    logoContainer.style.background = 'rgba(255, 255, 255, 0.9)';
     logoContainer.style.backdropFilter = 'blur(10px)';
-    logoContainer.style.borderRadius = '25px'; // Rounded corners (Squircleish)
+    logoContainer.style.borderRadius = '25px';
     logoContainer.style.padding = '12px';
     logoContainer.style.display = 'flex';
     logoContainer.style.alignItems = 'center';
     logoContainer.style.justifyContent = 'center';
     logoContainer.style.boxShadow = '0 8px 16px rgba(0,0,0,0.1)';
 
-    // Logo Image
     const logoImg = new Image();
     logoImg.src = 'assets/logo.svg';
     logoImg.style.width = '90px';
@@ -645,10 +546,9 @@ export class HomePage implements OnInit {
     logoContainer.appendChild(logoImg);
     footer.appendChild(logoContainer);
 
-    // App Name
     const brandName = document.createElement('span');
     brandName.innerText = 'Positive 2026';
-    brandName.style.fontSize = '36px'; // Slightly larger text
+    brandName.style.fontSize = '36px';
     brandName.style.fontWeight = '700';
     brandName.style.color = '#2d3436';
     brandName.style.letterSpacing = '1px';
@@ -657,16 +557,12 @@ export class HomePage implements OnInit {
     footer.appendChild(brandName);
 
     wrapper.appendChild(footer);
-
     document.body.appendChild(wrapper);
 
-    // 6. Capture
     try {
-      // Small delay to ensure image loads
       await new Promise((r) => setTimeout(r, 100));
-
       const canvas = await html2canvas(wrapper, {
-        scale: 2, // 2x scale for Retina sharpness (2160x2160 output)
+        scale: 2,
         useCORS: true,
         allowTaint: true,
         backgroundColor: null,
@@ -680,42 +576,102 @@ export class HomePage implements OnInit {
     }
   }
 
+  private blobToBase64(blob: Blob): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = reject;
+      reader.onload = () => {
+        resolve(reader.result as string);
+      };
+      reader.readAsDataURL(blob);
+    });
+  }
+
   async shareImage(elementId: string = 'main-quote-card') {
-    this.presentToast('Generando imagen...');
+    const loading = await this.loadingController.create({
+      message: 'Preparando imagen...',
+      spinner: 'crescent',
+      translucent: true,
+    });
+    await loading.present();
+
     try {
       const blob = await this.generateImageBlob(elementId);
       if (!blob) throw new Error('Blob generation failed');
 
-      const file = new File([blob], 'positive.png', { type: 'image/png' });
-      if (navigator.share) {
-        await navigator.share({
-          files: [file],
-          title: 'Positive 2026',
-          text: 'Mira esta frase ✨',
+      const base64Data = await this.blobToBase64(blob);
+      const fileName = `positive_quote_${new Date().getTime()}.png`;
+
+      try {
+        const savedFile = await Filesystem.writeFile({
+          path: fileName,
+          data: base64Data,
+          directory: Directory.Cache
         });
-      } else {
-        this.downloadBlob(blob);
+
+        await loading.dismiss(); // Dismiss before showing native share sheet
+
+        await Share.share({
+          title: 'Positive 2026',
+          text: `"${this.quote}" — ${this.author}`,
+          files: [savedFile.uri],
+          dialogTitle: 'Compartir frases'
+        });
+
+      } catch (err) {
+          console.error('Native share failed', err);
+          await loading.dismiss();
+          
+          if (navigator.share) {
+             const file = new File([blob], 'positive.png', { type: 'image/png' });
+             await navigator.share({
+                files: [file],
+                title: 'Positive 2026',
+                text: 'Mira esta frase ✨',
+             });
+          } else {
+             this.downloadBlob(blob);
+          }
       }
     } catch (e) {
       console.error(e);
+      await loading.dismiss();
       this.presentToast('No se pudo compartir');
     }
   }
 
   async copyImage(elementId: string = 'main-quote-card') {
-    this.presentToast('Copiando...');
+    const loading = await this.loadingController.create({
+      message: 'Copiando...',
+      spinner: 'crescent',
+      translucent: true,
+      duration: 3000 // Timeout de seguridad
+    });
+    await loading.present();
+
     try {
       const blob = await this.generateImageBlob(elementId);
       if (!blob) throw new Error('Blob generation failed');
-      if (navigator.clipboard && navigator.clipboard.write) {
-        await navigator.clipboard.write([
-          new ClipboardItem({ 'image/png': blob }),
-        ]);
-        this.presentToast('Copiado al portapapeles');
-      } else {
-        this.presentToast('Navegador no soportado');
+
+      const base64data = await this.blobToBase64(blob);
+        
+      try {
+        await CapacitorClipboard.write({
+          image: base64data
+        });
+        await loading.dismiss();
+        this.presentToast('Imagen copiada al portapapeles');
+      } catch (err) {
+          console.error('Clipboard image error', err);
+          await CapacitorClipboard.write({
+              string: `"${this.quote}" — ${this.author}\n\nDescubre más en Positive 2026 ✨`
+          });
+          await loading.dismiss();
+          this.presentToast('Texto copiado (Imagen no soportada)');
       }
     } catch (e) {
+      console.error(e);
+      await loading.dismiss();
       this.presentToast('Error al copiar');
     }
   }
