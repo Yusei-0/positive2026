@@ -676,6 +676,10 @@ export class HomePage implements OnInit {
     }
   }
 
+  trackById(index: number, item: any): string {
+    return item.id;
+  }
+
   downloadBlob(blob: Blob) {
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);

@@ -103,7 +103,7 @@
         <!-- Loaded State -->
         <ng-container *ngIf="!communityLoading && !communityError">
           <div class="community-list" *ngIf="communityQuotes.length > 0">
-            <div *ngFor="let comQuote of communityQuotes" [id]="comQuote.id" class="community-card animate-slide-up">
+            <div *ngFor="let comQuote of communityQuotes; trackBy: trackById" [id]="comQuote.id" class="community-card animate-slide-up">
               <div class="card-content">
                 <p class="com-text">"{{ comQuote.content }}"</p>
                 <div class="card-meta">

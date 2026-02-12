@@ -29,6 +29,8 @@ ion-content {
   filter: blur(60px);
   opacity: 0.7;
   animation: float 25s infinite ease-in-out alternate;
+  will-change: transform;
+  transform: translateZ(0); // Hardware acceleration trigger
 }
 
 .blob-1 {
@@ -213,6 +215,7 @@ ion-content {
 
   transform-style: preserve-3d;
   transition: transform 0.3s ease;
+  will-change: transform;
 }
 
 .quote-icon {
