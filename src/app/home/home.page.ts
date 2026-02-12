@@ -1,23 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
-  IonHeader,
-  IonToolbar,
-  IonTitle,
+
   IonContent,
-  IonCard,
-  IonCardContent,
+
   IonButton,
   IonIcon,
-  IonSpinner,
-  IonButtons,
+
   IonToast,
   IonFab,
   IonFabButton,
-  IonList,
-  IonItem,
-  IonLabel,
-  IonAvatar,
+ 
   IonSkeletonText,
   AlertController,
   ModalController,
@@ -35,9 +28,9 @@ import {
   flagOutline,
 } from 'ionicons/icons';
 import { FeedService } from '../services/feed.service';
-// import { Clipboard as CapacitorClipboard } from '@capacitor/clipboard';
-// import { Share } from '@capacitor/share';
-// import { Filesystem, Directory } from '@capacitor/filesystem';
+import { environment } from 'src/environments/environment';
+import { SupabaseService } from '../services/supabase.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-home',
