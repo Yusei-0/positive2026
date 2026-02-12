@@ -33,7 +33,7 @@
                 <p class="instruction">Enviamos un código a <strong>{{ email }}</strong></p>
                 <ion-item class="custom-item" lines="none">
                     <ion-icon name="key-outline" slot="start" style="margin-right: 10px; color: #636e72;"></ion-icon>
-                    <ion-input type="text" placeholder="123456" [(ngModel)]="otp" maxlength="8"
+                    <ion-input type="text" placeholder="12345678" [(ngModel)]="otp" maxlength="8"
                         class="custom-input"></ion-input>
                 </ion-item>
                 <ion-button expand="block" class="main-btn" (click)="verifyCode()" [disabled]="loading">

@@ -151,7 +151,7 @@ text
 5. Sistema envía email con código OTP a maria@gmail.com
    ↓
 6. Usuario abre email, copia código
-7. Pantalla: "Ingresa el código de 6 dígitos"
+7. Pantalla: "Ingresa el código de 8 dígitos"
 8. Usuario escribe código y presiona "Verificar"
    ↓
 9. Supabase Auth valida código
