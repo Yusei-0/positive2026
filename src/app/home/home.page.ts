@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import {
   IonContent,
   IonButton,
@@ -36,7 +36,7 @@ import { Router } from '@angular/router';
   styleUrls: ['home.page.scss'],
   standalone: true,
   imports: [
-    CommonModule,
+
     IonContent,
     IonButton,
     IonIcon,
@@ -497,9 +497,7 @@ export class HomePage implements OnInit {
     }
   }
 
-  trackById(index: number, item: any): string {
-    return item.id;
-  }
+
 
   presentToast(message: string) {
     this.toastMessage = message;

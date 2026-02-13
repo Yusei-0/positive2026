@@ -17,19 +17,21 @@
           <span class="brand-name">Positive 2026</span>
         </div>
 
-        <div class="brand-right" *ngIf="userProfile">
-          <div class="user-chip" (click)="goToProfile()">
-            <span class="user-name">{{ userProfile.username }}</span>
-            <div class="user-avatar">
-              {{ userProfile.username.charAt(0).toUpperCase() }}
+        @if (userProfile) {
+          <div class="brand-right">
+            <div class="user-chip" (click)="goToProfile()">
+              <span class="user-name">{{ userProfile.username }}</span>
+              <div class="user-avatar">
+                {{ userProfile.username.charAt(0).toUpperCase() }}
+              </div>
             </div>
           </div>
-        </div>
+        }
       </div>
 
       <!-- Hero Quote Section -->
       <div id="main-quote-card" class="quote-section">
-        <ng-container *ngIf="!loading; else loaderTemplate">
+        @if (!loading) {
           <div class="quote-card animate-pop-in">
             <div class="quote-badge">Frase del Día</div>
 
@@ -53,9 +55,7 @@
               </ion-button>
             </div>
           </div>
-        </ng-container>
-
-        <ng-template #loaderTemplate>
+        } @else {
           <div class="quote-card skeleton-card">
             <div style="width: 100%; display:flex; flex-direction:column; align-items:center;">
               <ion-skeleton-text animated
@@ -67,7 +67,7 @@
               <ion-skeleton-text animated style="width: 30%; height: 20px; border-radius: 5px;"></ion-skeleton-text>
             </div>
           </div>
-        </ng-template>
+        }
       </div>
 
       <!-- Community Section -->
@@ -75,66 +75,77 @@
         <div class="section-title">Comunidad</div>
 
         <!-- Loading State -->
-        <ng-container *ngIf="communityLoading">
+        <!-- Loading State -->
+        @if (communityLoading) {
           <div class="community-list">
-            <div *ngFor="let i of [1,2,3]" class="community-card skeleton-card">
-              <div class="card-content">
-                <ion-skeleton-text animated
-                  style="width: 90%; height: 20px; border-radius: 5px; margin-bottom: 10px;"></ion-skeleton-text>
-                <ion-skeleton-text animated
-                  style="width: 70%; height: 20px; border-radius: 5px; margin-bottom: 10px;"></ion-skeleton-text>
-                <ion-skeleton-text animated style="width: 40%; height: 15px; border-radius: 5px;"></ion-skeleton-text>
+            @for (i of [1,2,3]; track i) {
+              <div class="community-card skeleton-card">
+                <div class="card-content">
+                  <ion-skeleton-text animated
+                    style="width: 90%; height: 20px; border-radius: 5px; margin-bottom: 10px;"></ion-skeleton-text>
+                  <ion-skeleton-text animated
+                    style="width: 70%; height: 20px; border-radius: 5px; margin-bottom: 10px;"></ion-skeleton-text>
+                  <ion-skeleton-text animated style="width: 40%; height: 15px; border-radius: 5px;"></ion-skeleton-text>
+                </div>
               </div>
-            </div>
+            }
           </div>
-        </ng-container>
+        }
 
         <!-- Error State -->
-        <ng-container *ngIf="!communityLoading && communityError">
+        <!-- Error State -->
+        @if (!communityLoading && communityError) {
           <div class="error-state">
             <p>No se pudieron cargar las frases de la comunidad</p>
             <ion-button fill="clear" (click)="loadCommunityFeed()">Reintentar</ion-button>
           </div>
-        </ng-container>
+        }
 
         <!-- Loaded State -->
-        <ng-container *ngIf="!communityLoading && !communityError">
-          <div class="community-list" *ngIf="communityQuotes.length > 0">
-            <div *ngFor="let comQuote of communityQuotes; trackBy: trackById" [id]="comQuote.id" class="community-card animate-slide-up">
-              <div class="card-content">
-                <p class="com-text">"{{ comQuote.content }}"</p>
-                <div class="card-meta">
-                  <span class="com-author">— {{ comQuote.author }}</span>
-                  <span class="com-date">{{ comQuote.createdAt }}</span>
+        <!-- Loaded State -->
+        @if (!communityLoading && !communityError) {
+          @if (communityQuotes.length > 0) {
+            <div class="community-list">
+              @for (comQuote of communityQuotes; track comQuote.id) {
+                <div [id]="comQuote.id" class="community-card animate-slide-up">
+                  <div class="card-content">
+                    <p class="com-text">"{{ comQuote.content }}"</p>
+                    <div class="card-meta">
+                      <span class="com-author">— {{ comQuote.author }}</span>
+                      <span class="com-date">{{ comQuote.createdAt }}</span>
+                    </div>
+                  </div>
+                  <div class="card-actions exclude-from-capture">
+                    <div class="left-actions">
+                      <ion-button fill="clear" size="small" (click)="toggleLike(comQuote)"
+                        [color]="comQuote.liked ? 'danger' : 'medium'">
+                        <ion-icon [name]="comQuote.liked ? 'heart' : 'heart-outline'"></ion-icon>
+                        <span class="like-count">{{ comQuote.likes }}</span>
+                      </ion-button>
+                    </div>
+                    <div class="right-actions">
+                      <ion-button fill="clear" size="small" color="medium" (click)="shareQuote(comQuote.content, comQuote.author)">
+                        <ion-icon slot="icon-only" name="share-social-outline"></ion-icon>
+                      </ion-button>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div class="card-actions exclude-from-capture">
-                <div class="left-actions">
-                  <ion-button fill="clear" size="small" (click)="toggleLike(comQuote)"
-                    [color]="comQuote.liked ? 'danger' : 'medium'">
-                    <ion-icon [name]="comQuote.liked ? 'heart' : 'heart-outline'"></ion-icon>
-                    <span class="like-count">{{ comQuote.likes }}</span>
-                  </ion-button>
-                </div>
-                <div class="right-actions">
-                  <ion-button fill="clear" size="small" color="medium" (click)="shareQuote(comQuote.content, comQuote.author)">
-                    <ion-icon slot="icon-only" name="share-social-outline"></ion-icon>
-                  </ion-button>
-                </div>
-              </div>
+              }
             </div>
-          </div>
+          }
 
-          <div class="empty-state" *ngIf="communityQuotes.length === 0">
-            <p>Sé el primero en compartir una frase inspiradora ✨</p>
-          </div>
+          @if (communityQuotes.length === 0) {
+            <div class="empty-state">
+              <p>Sé el primero en compartir una frase inspiradora ✨</p>
+            </div>
+          }
 
           <!-- Infinite Scroll -->
           <ion-infinite-scroll (ionInfinite)="loadMore($event)" [disabled]="!hasMoreQuotes">
             <ion-infinite-scroll-content loadingSpinner="bubbles" loadingText="Cargando más frases...">
             </ion-infinite-scroll-content>
           </ion-infinite-scroll>
-        </ng-container>
+        }
       </div>
 
     </div>
