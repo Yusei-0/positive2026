@@ -21,6 +21,12 @@
               </div>
             </div>
           </div>
+        } @else if (loading) {
+          <div class="brand-right">
+            <div class="user-chip" style="border: none; background: transparent; box-shadow: none;">
+               <ion-skeleton-text animated style="width: 120px; height: 35px; border-radius: 50px; opacity: 0.5;"></ion-skeleton-text>
+            </div>
+          </div>
         }
       </div>
 
