@@ -17,17 +17,18 @@ export const routes: Routes = [
   {
     path: 'home',
     loadComponent: () => import('./home/home.page').then((m) => m.HomePage),
+    canActivate: [AuthGuard],
   },
   {
     path: 'profile',
     loadComponent: () =>
       import('./pages/profile/profile.page').then((m) => m.ProfilePage),
+    canActivate: [AuthGuard],
   },
   {
     path: '',
     pathMatch: 'full',
     loadComponent: () =>
-      import('./pages/login/login.page').then((m) => m.LoginPage),
-    canActivate: [AuthGuard],
+      import('./pages/splash/splash.page').then((m) => m.SplashPage),
   },
 ];

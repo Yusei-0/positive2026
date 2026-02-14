@@ -18,8 +18,8 @@ export class AuthGuard implements CanActivate {
     return from(this.supabaseService.getUser()).pipe(
       map(({ data: { user } }) => {
         if (user) {
-          // User is authenticated -> Redirect to HOME (Feed)
-          return this.router.createUrlTree(['/home']);
+          // User is authenticated -> Allow access
+          return true;
         } else {
           // User is NOT authenticated -> Redirect to LOGIN
           return this.router.createUrlTree(['/login']);
