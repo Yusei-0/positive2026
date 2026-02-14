@@ -25,6 +25,7 @@ import {
 } from 'ionicons/icons';
 import { SupabaseService } from '../../services/supabase.service';
 import { Router } from '@angular/router';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-profile',
@@ -54,6 +55,7 @@ export class ProfilePage implements OnInit {
   quotesLoading = true;
   editingUsername = false;
   newUsername = '';
+  appVersion = environment.version;
 
   isToastOpen = false;
   toastMessage = '';
