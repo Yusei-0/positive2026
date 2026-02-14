@@ -192,4 +192,11 @@ export class SupabaseService {
       user_id: userId,
     });
   }
+  async getConfig(key: string) {
+    return this.supabase
+      .from('config')
+      .select('value')
+      .eq('key', key)
+      .single();
+  }
 }

@@ -1,0 +1,17 @@
+<ion-content class="ion-padding">
+  <div class="modal-container">
+    <div class="icon-wrapper">
+      <ion-icon name="rocket-outline"></ion-icon>
+    </div>
+    
+    <h2>¡Actualización Disponible!</h2>
+    <p>Hemos lanzado una nueva versión de Positive 2026 con mejoras y nuevas funciones.</p>
+    <p class="secondary-text">Versión requerida: {{ requiredVersion }}</p>
+
+    <div class="actions">
+      <ion-button expand="block" shape="round" color="primary" (click)="updateApp()">
+        Actualizar Ahora
+      </ion-button>
+    </div>
+  </div>
+</ion-content>
