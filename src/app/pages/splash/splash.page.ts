@@ -5,6 +5,7 @@ import { IonContent, IonSpinner, ModalController } from '@ionic/angular/standalo
 import { SupabaseService } from 'src/app/services/supabase.service';
 import { environment } from 'src/environments/environment';
 import { UpdateRequiredModalComponent } from 'src/app/components/update-required-modal/update-required-modal.component';
+import { LocalNotificationService } from 'src/app/services/local-notification.service';
 
 @Component({
   selector: 'app-splash',
@@ -18,7 +19,8 @@ export class SplashPage implements OnInit {
   constructor(
     private router: Router,
     private supabaseService: SupabaseService,
-    private modalController: ModalController
+    private modalController: ModalController,
+    private localNotificationService: LocalNotificationService
   ) { }
 
   async ngOnInit() {
@@ -39,8 +41,22 @@ export class SplashPage implements OnInit {
       // Continue to app if check fails (fail open)
     }
 
-    // 2. Check session
+    // 2. Initialize Notifications (fire and forget)
+    this.initNotifications();
+
+    // 3. Check session
     this.checkAuth();
+  }
+
+  async initNotifications() {
+    try {
+      const granted = await this.localNotificationService.requestPermissions();
+      if (granted) {
+        await this.localNotificationService.scheduleDailyReminder();
+      }
+    } catch (e) {
+      console.warn('Notification init failed', e);
+    }
   }
 
   isUpdateRequired(current: string, latest: string): boolean {
