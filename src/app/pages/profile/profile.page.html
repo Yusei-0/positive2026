@@ -3,8 +3,11 @@
         <ion-buttons slot="start">
             <ion-back-button defaultHref="/home"></ion-back-button>
         </ion-buttons>
-        <ion-title>Mi Perfil - V{{ appVersion }}</ion-title>    
-    </ion-toolbar>
+        <ion-title>Mi Perfil</ion-title>
+        <div slot="end" class="version-badge">
+            v{{ appVersion }}
+        </div>
+    </ion-toolbar>    
 </ion-header>
 
 <ion-content [fullscreen]="true">
