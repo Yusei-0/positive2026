@@ -1,4 +1,4 @@
--- 1. Profiles Table
+-- 1. Profiles table
 -- Extends the auth.users table
 create table public.profiles (
   id uuid not null references auth.users on delete cascade,

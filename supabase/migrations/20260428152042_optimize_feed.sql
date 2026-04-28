@@ -1,4 +1,4 @@
--- 1. Optimize user_quotes for time-based filtering
+-- 1. Optimize user_quotes for time-based filtering.
 CREATE INDEX IF NOT EXISTS idx_user_quotes_created_at ON public.user_quotes(created_at);
 
 -- 2. Update get_smart_feed to limit candidate pool to last 45 days

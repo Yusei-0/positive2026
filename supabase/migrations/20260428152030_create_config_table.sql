@@ -1,4 +1,4 @@
--- Create config table
+-- Create config table.
 CREATE TABLE IF NOT EXISTS public.config (
   key text PRIMARY KEY,
   value text NOT NULL,

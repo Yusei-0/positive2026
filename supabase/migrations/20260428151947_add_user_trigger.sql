@@ -1,4 +1,4 @@
--- Trigger for creating a profile on signup
+-- Trigger for creating a profile when a user signs up
 create or replace function public.handle_new_user()
 returns trigger as $$
 begin

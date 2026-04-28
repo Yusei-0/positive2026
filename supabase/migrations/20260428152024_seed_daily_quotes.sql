@@ -1,4 +1,4 @@
--- Semilla de datos para daily_quotes (Extendido)
+-- Semilla de datos para daily_quotes.
 -- Inserta frases para hoy y los próximos 45 días
 
 insert into public.daily_quotes (quote, author, date, category)
@@ -48,5 +48,5 @@ values
   ('El momento es ahora.', 'Anónimo', CURRENT_DATE + 42, 'Presente'),
   ('Haz lo que puedas, con lo que tengas, donde estés.', 'Theodore Roosevelt', CURRENT_DATE + 43, 'Acción'),
   ('La vida es corta, sonríele a quien llora, ignora a quien te critica y sé feliz con quien te importa.', 'Anónimo', CURRENT_DATE + 44, 'Vida')
-on conflict (date) do update 
+on conflict (date) do update
 set quote = excluded.quote, author = excluded.author, category = excluded.category;
