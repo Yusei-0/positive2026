@@ -34,6 +34,16 @@ export interface Like {
   created_at: string;
 }
 
+export interface Comment {
+  id: string;
+  quote_id: string;
+  user_id: string;
+  content: string;
+  created_at: string;
+  profiles?: Pick<Profile, 'username' | 'avatar_url'>;
+  is_owner?: boolean;
+}
+
 export interface FeedItem {
   id: string;
   quote: string;
@@ -41,6 +51,7 @@ export interface FeedItem {
   username: string;
   avatar_url: string | null;
   likes_count: number;
+  comments_count: number;
   user_liked: boolean;
   created_at: string;
   is_owner: boolean;

@@ -174,6 +174,58 @@ export class SupabaseService {
       .eq('user_id', userId);
   }
 
+  async getComments(quoteId: string, currentUserId?: string) {
+    const { data, error } = await this.supabase
+      .from('comments')
+      .select(
+        `
+        id,
+        quote_id,
+        user_id,
+        content,
+        created_at,
+        profiles (username, avatar_url)
+      `
+      )
+      .eq('quote_id', quoteId)
+      .order('created_at', { ascending: true });
+
+    if (error || !data) return { data, error };
+
+    return {
+      data: data.map((comment) => ({
+        ...comment,
+        is_owner: currentUserId ? comment.user_id === currentUserId : false,
+      })),
+      error: null,
+    };
+  }
+
+  async createComment(quoteId: string, userId: string, content: string) {
+    return this.supabase
+      .from('comments')
+      .insert({
+        quote_id: quoteId,
+        user_id: userId,
+        content: content.trim(),
+      })
+      .select(
+        `
+        id,
+        quote_id,
+        user_id,
+        content,
+        created_at,
+        profiles (username, avatar_url)
+      `
+      )
+      .single();
+  }
+
+  async deleteComment(commentId: string) {
+    return this.supabase.from('comments').delete().eq('id', commentId);
+  }
+
   async getUserQuotes(userId: string) {
     return this.supabase
       .from('user_quotes')

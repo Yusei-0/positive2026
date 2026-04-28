@@ -123,6 +123,10 @@
                         <ion-icon [name]="comQuote.liked ? 'heart' : 'heart-outline'"></ion-icon>
                         <span class="like-count">{{ comQuote.likes }}</span>
                       </ion-button>
+                      <ion-button fill="clear" size="small" color="medium" (click)="toggleComments(comQuote)">
+                        <ion-icon name="chatbubble-outline"></ion-icon>
+                        <span class="like-count">{{ comQuote.commentsCount }}</span>
+                      </ion-button>
                     </div>
                     <div class="right-actions">
                       <ion-button fill="clear" size="small" color="medium" (click)="shareQuote(comQuote.content, comQuote.author)">
@@ -130,6 +134,60 @@
                       </ion-button>
                     </div>
                   </div>
+                  @if (comQuote.commentsOpen) {
+                    <div class="comments-panel">
+                      @if (comQuote.commentsLoading) {
+                        <div class="comments-loading">
+                          <ion-skeleton-text animated style="width: 85%; height: 14px; border-radius: 5px;"></ion-skeleton-text>
+                          <ion-skeleton-text animated style="width: 55%; height: 14px; border-radius: 5px;"></ion-skeleton-text>
+                        </div>
+                      } @else {
+                        @if (comQuote.comments.length > 0) {
+                          <div class="comments-list">
+                            @for (comment of comQuote.comments; track comment.id) {
+                              <div class="comment-row">
+                                <div class="comment-avatar" [style.background]="getAvatarColor(comment.author || 'A')">
+                                  {{ (comment.author || 'A').charAt(0).toUpperCase() }}
+                                </div>
+                                <div class="comment-body">
+                                  <div class="comment-meta">
+                                    <span class="comment-author">{{ comment.author }}</span>
+                                    <span class="comment-date">{{ comment.createdAt }}</span>
+                                  </div>
+                                  <p>{{ comment.content }}</p>
+                                </div>
+                                @if (comment.is_owner) {
+                                  <ion-button fill="clear" size="small" color="medium" class="comment-delete" (click)="deleteComment(comQuote, comment)">
+                                    <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+                                  </ion-button>
+                                }
+                              </div>
+                            }
+                          </div>
+                        } @else {
+                          <p class="comments-empty">Sé el primero en comentar.</p>
+                        }
+
+                        <div class="comment-composer">
+                          <textarea
+                            [value]="comQuote.commentDraft"
+                            (input)="updateCommentDraft(comQuote, $event)"
+                            maxlength="280"
+                            rows="1"
+                            placeholder="Escribe un comentario"
+                            [disabled]="!userProfile || comQuote.commentSubmitting"></textarea>
+                          <ion-button
+                            fill="clear"
+                            size="small"
+                            color="dark"
+                            [disabled]="!userProfile || !comQuote.commentDraft.trim() || comQuote.commentSubmitting"
+                            (click)="submitComment(comQuote)">
+                            <ion-icon slot="icon-only" name="paper-plane-outline"></ion-icon>
+                          </ion-button>
+                        </div>
+                      }
+                    </div>
+                  }
                 </div>
               }
             </div>

@@ -29,6 +29,7 @@ Ejecutar en este orden sobre un proyecto Supabase nuevo:
 5. `supabase/migrations/20260428152042_optimize_feed.sql`
 6. `supabase/migrations/20260428152103_harden_trigger_functions.sql`
 7. `supabase/migrations/20260428152140_optimize_rls_and_foreign_keys.sql`
+8. `supabase/migrations/20260428155223_add_quote_comments.sql`
 
 Esto crea:
 
@@ -41,6 +42,7 @@ Esto crea:
 - trigger `on_like_change`
 - trigger `on_auth_user_created`
 - RPC `get_smart_feed`
+- `comments` for community quote comments
 - hardened function `search_path` and trigger function execution grants
 - foreign-key indexes and optimized RLS auth checks
 

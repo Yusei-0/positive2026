@@ -23,6 +23,9 @@ import {
   add,
   flagOutline,
   shareSocialOutline,
+  chatbubbleOutline,
+  paperPlaneOutline,
+  trashOutline,
 } from 'ionicons/icons';
 import { FeedService } from '../services/feed.service';
 import { environment } from 'src/environments/environment';
@@ -89,6 +92,9 @@ export class HomePage implements OnInit {
       heart,
       refreshOutline,
       shareSocialOutline,
+      chatbubbleOutline,
+      paperPlaneOutline,
+      trashOutline,
     });
     this.dailySeed = this.feedService.getDailySeed();
   }
@@ -150,6 +156,13 @@ export class HomePage implements OnInit {
         content: q.quote,
         author: q.username || 'Anónimo',
         likes: q.likes_count || 0,
+        commentsCount: q.comments_count || 0,
+        commentsOpen: false,
+        commentsLoading: false,
+        commentsLoaded: false,
+        comments: [],
+        commentDraft: '',
+        commentSubmitting: false,
         liked: q.user_liked || false,
         createdAt: this.formatDate(q.created_at),
         profileColor: this.getAvatarColor(q.username || 'A'),
@@ -378,6 +391,103 @@ export class HomePage implements OnInit {
       quote.liked = previousLiked;
       quote.likes = previousLikes;
       this.presentToast('Error al dar like');
+    }
+  }
+
+  updateCommentDraft(quote: any, event: Event) {
+    const input = event.target as HTMLTextAreaElement;
+    quote.commentDraft = input.value.slice(0, 280);
+  }
+
+  async toggleComments(quote: any) {
+    quote.commentsOpen = !quote.commentsOpen;
+    if (quote.commentsOpen && !quote.commentsLoaded) {
+      await this.loadComments(quote);
+    }
+  }
+
+  async loadComments(quote: any) {
+    quote.commentsLoading = true;
+    try {
+      const {
+        data: { user },
+      } = await this.supabaseService.getUser();
+      const { data, error } = await this.supabaseService.getComments(
+        quote.id,
+        user?.id
+      );
+      if (error) throw error;
+      quote.comments = (data || []).map((comment: any) => ({
+        ...comment,
+        author: comment.profiles?.username || 'Anónimo',
+        createdAt: this.formatDate(comment.created_at),
+      }));
+      quote.commentsLoaded = true;
+      quote.commentsCount = quote.comments.length;
+    } catch (e) {
+      console.error('Comments load error', e);
+      this.presentToast('No se pudieron cargar los comentarios');
+    } finally {
+      quote.commentsLoading = false;
+    }
+  }
+
+  async submitComment(quote: any) {
+    if (!this.userProfile) {
+      this.presentToast('Debes iniciar sesión para comentar');
+      return;
+    }
+
+    const content = (quote.commentDraft || '').trim();
+    if (!content) return;
+
+    quote.commentSubmitting = true;
+    try {
+      const {
+        data: { user },
+      } = await this.supabaseService.getUser();
+      if (!user) throw new Error('No user');
+
+      const { data, error } = await this.supabaseService.createComment(
+        quote.id,
+        user.id,
+        content
+      );
+      if (error) throw error;
+
+      const createdComment: any = data;
+      const createdProfile = Array.isArray(createdComment?.profiles)
+        ? createdComment.profiles[0]
+        : createdComment?.profiles;
+      const newComment = {
+        ...createdComment,
+        author: createdProfile?.username || this.userProfile.username || 'Anónimo',
+        createdAt: this.formatDate(createdComment?.created_at),
+        is_owner: true,
+      };
+
+      quote.comments = [...(quote.comments || []), newComment];
+      quote.commentsLoaded = true;
+      quote.commentsOpen = true;
+      quote.commentsCount = (quote.commentsCount || 0) + 1;
+      quote.commentDraft = '';
+    } catch (e) {
+      console.error('Comment error', e);
+      this.presentToast('No se pudo publicar el comentario');
+    } finally {
+      quote.commentSubmitting = false;
+    }
+  }
+
+  async deleteComment(quote: any, comment: any) {
+    try {
+      const { error } = await this.supabaseService.deleteComment(comment.id);
+      if (error) throw error;
+      quote.comments = quote.comments.filter((item: any) => item.id !== comment.id);
+      quote.commentsCount = Math.max((quote.commentsCount || 1) - 1, 0);
+    } catch (e) {
+      console.error('Delete comment error', e);
+      this.presentToast('No se pudo borrar el comentario');
     }
   }
 

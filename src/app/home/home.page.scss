@@ -327,6 +327,140 @@ ion-content {
       height: 30px;
     }
   }
+
+  .comments-panel {
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    margin-top: 0.75rem;
+    padding-top: 1rem;
+  }
+
+  .comments-loading {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .comments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    margin-bottom: 1rem;
+  }
+
+  .comment-row {
+    display: grid;
+    grid-template-columns: 32px minmax(0, 1fr) 30px;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .comment-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.82rem;
+    font-weight: 700;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  }
+
+  .comment-body {
+    min-width: 0;
+    background: rgba(255, 255, 255, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    border-radius: 14px;
+    padding: 0.65rem 0.75rem;
+
+    p {
+      margin: 0.25rem 0 0;
+      color: #2d3436;
+      font-size: 0.92rem;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  .comment-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+  }
+
+  .comment-author {
+    color: #2d3436;
+    font-size: 0.82rem;
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .comment-date {
+    color: #95a5a6;
+    font-size: 0.75rem;
+    font-weight: 500;
+    flex: 0 0 auto;
+  }
+
+  .comment-delete {
+    --padding-start: 0;
+    --padding-end: 0;
+    height: 30px;
+    margin: 0;
+  }
+
+  .comments-empty {
+    color: #95a5a6;
+    font-size: 0.9rem;
+    margin: 0 0 0.85rem;
+  }
+
+  .comment-composer {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 38px;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    border-radius: 18px;
+    padding: 0.4rem 0.4rem 0.4rem 0.85rem;
+
+    textarea {
+      width: 100%;
+      min-height: 34px;
+      max-height: 96px;
+      border: none;
+      outline: none;
+      resize: vertical;
+      background: transparent;
+      color: #2d3436;
+      font: inherit;
+      font-size: 0.92rem;
+      line-height: 1.35;
+      padding: 0.45rem 0;
+    }
+
+    textarea::placeholder {
+      color: #95a5a6;
+    }
+
+    textarea:disabled {
+      opacity: 0.65;
+    }
+
+    ion-button {
+      --padding-start: 0;
+      --padding-end: 0;
+      width: 34px;
+      height: 34px;
+      margin: 0;
+    }
+  }
 }
 
 .error-state,
